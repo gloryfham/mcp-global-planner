@@ -1,7 +1,7 @@
 {
   "name": "@gloryfham/mcp-global-planner",
-  "version": "1.0.0",
-  "description": "荣耀全球路径规划师 — 联动保险与移民签证的智能规划 MCP Server",
+  "version": "1.1.0",
+  "description": "荣耀全球路径规划师 — 联动保险、移民签证与信托传承的智能规划 MCP Server",
   "type": "module",
   "bin": {
     "gloryfham-mcp-global-planner": "./bin/mcp.js"
@@ -26,6 +26,8 @@
     "insurance",
     "visa",
     "immigration",
+    "trust",
+    "family-trust",
     "global-planner",
     "gloryfham"
   ],

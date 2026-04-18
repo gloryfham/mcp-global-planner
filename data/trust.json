@@ -1,0 +1,197 @@
+{
+  "serviceTypes": [
+    {
+      "serviceType": "信托受托人服务",
+      "serviceTypeDesc": "提供专业信托受托管理服务，包括家族信托和员工信托",
+      "subServices": [
+        {
+          "name": "家族信托服务",
+          "description": "为高净值家庭提供财富传承、资产保护和税务规划的家族信托解决方案",
+          "jurisdictions": ["HK", "SG"]
+        },
+        {
+          "name": "员工信托服务",
+          "description": "为企业上市前后提供员工持股信托服务，适用于香港、美国、新加坡等上市地",
+          "applicableMarkets": ["香港", "美国", "新加坡"]
+        }
+      ]
+    },
+    {
+      "serviceType": "海外公司秘书服务",
+      "serviceTypeDesc": "设立海外公司并提供后续的公司秘书服务，协助制作海外公司的财务账目",
+      "jurisdictions": ["香港", "英属维尔京群岛", "开曼群岛", "塞舌尔群岛"],
+      "services": [
+        "完成注册地政府年审要求",
+        "提供合规咨询服务"
+      ]
+    }
+  ],
+  "jurisdictions": [
+    {
+      "code": "HK",
+      "name": "香港",
+      "legalSystem": "「基本法」规定香港特别行政区享有独立的司法权和终审权；根据一国两制原则，香港的法律制度得以继续原有的普通法体系。",
+      "trustDuration": "永久",
+      "trusteeResidencyRequirement": "无",
+      "beneficiaryResidencyRequirement": "无",
+      "settlorRetainedPowers": "委托人可保留部分投资或资产管理权力",
+      "protector": "无法条规定，但普遍适用",
+      "confidentiality": "未经法律要求，无需披露任何信托信息",
+      "removeTrustee": "可以（已成年且有法律行为能力之全体受益人，直接罢免）",
+      "trusteeRegulation": "受香港受托人条例约束",
+      "trustProducts": [
+        {
+          "productCode": "HK_FT_001",
+          "productName": "香港家族信托",
+          "productType": "家族信托",
+          "minTrustAmount": "1000万港币",
+          "description": "适用于高净值家庭的财富传承方案，享受香港普通法体系保护",
+          "features": [
+            "信托期限永久",
+            "委托人可保留投资权力",
+            "信息高度保密",
+            "灵活变更受益人"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "SG",
+      "name": "新加坡",
+      "legalSystem": "新加坡为前英国殖民地，继承英国普通法制度。现为独立国家，拥有独立的司法权。",
+      "trustDuration": "100年",
+      "trusteeResidencyRequirement": "无",
+      "beneficiaryResidencyRequirement": "无",
+      "settlorRetainedPowers": "委托人可保留部分投资或资产管理权力",
+      "protector": "无法条规定，但普遍适用",
+      "confidentiality": "未经法律要求，无需披露任何信托信息",
+      "removeTrustee": "可以（已成年且有法律行为能力之全体受益人，直接罢免）",
+      "trusteeRegulation": "受新加坡金融管理局监管",
+      "trustProducts": [
+        {
+          "productCode": "SG_FT_001",
+          "productName": "新加坡家族信托",
+          "productType": "家族信托",
+          "minTrustAmount": "200万新币",
+          "description": "新加坡作为亚洲金融中心，提供稳定可靠的家族信托服务",
+          "features": [
+            "信托期限100年",
+            "受新加坡金融管理局监管",
+            "信息高度保密",
+            "委托人可保留投资权力"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "BVI",
+      "name": "英属维尔京群岛",
+      "legalSystem": "英国海外领地，采用普通法体系，拥有成熟的离岸金融服务法律框架。",
+      "trustDuration": "根据信托契约约定",
+      "trusteeResidencyRequirement": "无",
+      "beneficiaryResidencyRequirement": "无",
+      "settlorRetainedPowers": "委托人可保留广泛权力",
+      "protector": "可设立保护人",
+      "confidentiality": "高度保密，无需公开信托信息",
+      "removeTrustee": "可根据信托条款罢免",
+      "trusteeRegulation": "受BVI信托法约束",
+      "trustProducts": [
+        {
+          "productCode": "BVI_OC_001",
+          "productName": "BVI公司秘书服务",
+          "productType": "海外公司秘书服务",
+          "minTrustAmount": "根据具体需求",
+          "description": "设立BVI公司并提供公司秘书服务，协助财务账目制作和年审",
+          "features": [
+            "设立手续简便",
+            "税务优化",
+            "信息保密",
+            "年审合规支持"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "KY",
+      "name": "开曼群岛",
+      "legalSystem": "英国海外领地，普通法体系，全球领先的离岸金融中心。",
+      "trustDuration": "根据信托契约约定",
+      "trusteeResidencyRequirement": "无",
+      "beneficiaryResidencyRequirement": "无",
+      "settlorRetainedPowers": "委托人可保留广泛权力",
+      "protector": "可设立保护人",
+      "confidentiality": "高度保密，无需公开信托信息",
+      "removeTrustee": "可根据信托条款罢免",
+      "trusteeRegulation": "受开曼信托法约束",
+      "trustProducts": [
+        {
+          "productCode": "KY_OC_001",
+          "productName": "开曼公司秘书服务",
+          "productType": "海外公司秘书服务",
+          "minTrustAmount": "根据具体需求",
+          "description": "设立开曼公司并提供公司秘书服务，协助财务账目制作和年审",
+          "features": [
+            "国际认可的离岸架构",
+            "税务优化",
+            "信息保密",
+            "年审合规支持"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "SC",
+      "name": "塞舌尔群岛",
+      "legalSystem": "混合法律体系（普通法和大陆法），离岸金融中心。",
+      "trustDuration": "根据信托契约约定",
+      "trusteeResidencyRequirement": "无",
+      "beneficiaryResidencyRequirement": "无",
+      "settlorRetainedPowers": "委托人可保留广泛权力",
+      "protector": "可设立保护人",
+      "confidentiality": "高度保密，无需公开信托信息",
+      "removeTrustee": "可根据信托条款罢免",
+      "trusteeRegulation": "受塞舌尔信托法约束",
+      "trustProducts": [
+        {
+          "productCode": "SC_OC_001",
+          "productName": "塞舌尔公司秘书服务",
+          "productType": "海外公司秘书服务",
+          "minTrustAmount": "根据具体需求",
+          "description": "设立塞舌尔公司并提供公司秘书服务，协助财务账目制作和年审",
+          "features": [
+            "低成本离岸架构",
+            "税务优化",
+            "信息保密",
+            "年审合规支持"
+          ]
+        }
+      ]
+    }
+  ],
+  "employeeTrustMarkets": [
+    {
+      "market": "香港",
+      "description": "适用于香港联交所上市企业的员工持股信托方案",
+      "productCode": "HK_ET_001",
+      "productName": "香港员工信托服务",
+      "productType": "员工信托",
+      "services": ["上市前员工信托", "上市后员工信托"]
+    },
+    {
+      "market": "美国",
+      "description": "适用于美国SEC监管下上市企业的员工持股信托方案",
+      "productCode": "US_ET_001",
+      "productName": "美国员工信托服务",
+      "productType": "员工信托",
+      "services": ["上市前员工信托", "上市后员工信托"]
+    },
+    {
+      "market": "新加坡",
+      "description": "适用于新加坡交易所上市企业的员工持股信托方案",
+      "productCode": "SG_ET_001",
+      "productName": "新加坡员工信托服务",
+      "productType": "员工信托",
+      "services": ["上市前员工信托", "上市后员工信托"]
+    }
+  ]
+}

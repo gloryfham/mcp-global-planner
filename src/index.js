@@ -42,6 +42,48 @@ visaProjectTypes.forEach(pt => {
   });
 });
 
+// 加载信托产品数据
+const trustRaw = JSON.parse(
+  readFileSync(join(__dirname, '..', 'data', 'trust.json'), 'utf-8')
+);
+const trustServiceTypes = trustRaw.serviceTypes || [];
+const trustJurisdictions = trustRaw.jurisdictions || [];
+const trustEmployeeMarkets = trustRaw.employeeTrustMarkets || [];
+
+// 扁平化所有信托产品
+const allTrustProducts = [];
+const trustProductMap = {};
+
+// 家族信托 + 公司秘书服务
+trustJurisdictions.forEach(j => {
+  (j.trustProducts || []).forEach(product => {
+    const enriched = {
+      ...product,
+      jurisdiction: j.name,
+      jurisdictionCode: j.code,
+      serviceType: product.productType === '海外公司秘书服务' ? '海外公司秘书服务' : '家族信托',
+    };
+    allTrustProducts.push(enriched);
+    trustProductMap[product.productCode] = enriched;
+  });
+});
+
+// 员工信托
+trustEmployeeMarkets.forEach(m => {
+  const product = {
+    productCode: m.productCode,
+    productName: m.productName,
+    productType: m.productType,
+    serviceType: '员工信托',
+    jurisdiction: m.market,
+    jurisdictionCode: m.market === '香港' ? 'HK' : m.market === '美国' ? 'US' : 'SG',
+    description: m.description,
+    services: m.services,
+  };
+  allTrustProducts.push(product);
+  trustProductMap[m.productCode] = product;
+});
+
 // ============================================================
 // 关键词匹配
 // ============================================================
@@ -71,6 +113,21 @@ function matchesVisa(project, keyword) {
   );
 }
 
+function matchesTrust(product, keyword) {
+  if (!keyword) return true;
+  const kw = keyword.toLowerCase();
+  return (
+    (product.productName || '').toLowerCase().includes(kw) ||
+    (product.productCode || '').toLowerCase().includes(kw) ||
+    (product.jurisdiction || '').toLowerCase().includes(kw) ||
+    (product.jurisdictionCode || '').toLowerCase().includes(kw) ||
+    (product.productType || '').toLowerCase().includes(kw) ||
+    (product.serviceType || '').toLowerCase().includes(kw) ||
+    (product.description || '').toLowerCase().includes(kw) ||
+    (product.features || []).some(f => f.toLowerCase().includes(kw))
+  );
+}
+
 // ============================================================
 // 路径规划引擎
 // ============================================================
@@ -92,6 +149,7 @@ function generatePathRecommendation({
     pathSteps: [],
     insuranceSuggestions: [],
     visaSuggestions: [],
+    trustSuggestions: [],
     priority: '',
     rationale: '',
   };
@@ -106,8 +164,8 @@ function generatePathRecommendation({
 
   // 2. 根据主要目标确定优先级
   if (primaryGoal === 'identity' || primaryGoal === 'comprehensive') {
-    recommendations.priority = '身份先行，保障同步';
-    recommendations.rationale = '身份规划通常是家庭跨境配置的第一步，建议在启动身份申请的同时，同步搭建基础保障框架。';
+    recommendations.priority = '身份先行，保障同步，传承布局';
+    recommendations.rationale = '身份规划通常是家庭跨境配置的第一步，建议在启动身份申请的同时，同步搭建基础保障框架，并为财富传承做好信托架构准备。';
 
     // 身份类项目优先
     if (matchedVisas.length > 0) {
@@ -129,11 +187,18 @@ function generatePathRecommendation({
       ).slice(0, 5);
     }
 
+    // 推荐与目标地区匹配的信托产品
+    const matchedTrusts = allTrustProducts.filter(t =>
+      targetRegions.has(t.jurisdictionCode) || t.jurisdictionCode === 'BVI' || t.jurisdictionCode === 'KY'
+    );
+    recommendations.trustSuggestions = matchedTrusts.slice(0, 3);
+
     recommendations.pathSteps = [
       { step: 1, phase: '身份准备', action: '启动目标国家签证/居留申请流程', timeline: '第1-3个月' },
       { step: 2, phase: '保障搭建', action: '配置基础医疗、重疾、寿险，覆盖家庭主要风险', timeline: '第2-4个月' },
-      { step: 3, phase: '教育规划', action: '根据子女年龄选择分红险/年金险作为教育金储备', timeline: '第3-6个月' },
-      { step: 4, phase: '落地执行', action: '完成身份材料递交，保险保单生效', timeline: '第6-12个月' },
+      { step: 3, phase: '传承布局', action: '根据资产规模选择家族信托架构，锁定财富传承方案', timeline: '第3-6个月' },
+      { step: 4, phase: '教育规划', action: '根据子女年龄选择分红险/年金险作为教育金储备', timeline: '第3-6个月' },
+      { step: 5, phase: '落地执行', action: '完成身份材料递交，保险保单生效，信托架构设立', timeline: '第6-12个月' },
     ];
 
   } else if (primaryGoal === 'insurance') {
@@ -175,8 +240,8 @@ function generatePathRecommendation({
     ];
 
   } else if (primaryGoal === 'retirement') {
-    recommendations.priority = '养老规划 + 宜居身份';
-    recommendations.rationale = '养老规划应尽早锁定长期稳定收益，同时考虑目标养老地的身份安排。';
+    recommendations.priority = '养老规划 + 宜居身份 + 传承架构';
+    recommendations.rationale = '养老规划应尽早锁定长期稳定收益，同时考虑目标养老地的身份安排和财富传承架构。';
 
     // 推荐年金险/分红险
     recommendations.insuranceSuggestions = insuranceProducts.filter(p =>
@@ -188,11 +253,17 @@ function generatePathRecommendation({
       ['希腊', '西班牙', '马耳他', '泰国', '马来西亚'].some(c => (v.country || '').includes(c))
     ).slice(0, 3);
 
+    // 推荐信托传承方案
+    recommendations.trustSuggestions = allTrustProducts.filter(t =>
+      t.productType === '家族信托'
+    ).slice(0, 2);
+
     recommendations.pathSteps = [
       { step: 1, phase: '养老地选择', action: '评估目标养老地的医疗、生活成本、居住要求', timeline: '第1-2个月' },
       { step: 2, phase: '养老金锁定', action: '通过年金险/分红险建立稳定现金流', timeline: '第2-4个月' },
-      { step: 3, phase: '身份申请', action: '申请目标国家长期居留或永居', timeline: '第4-8个月' },
-      { step: 4, phase: '落地准备', action: '税务规划、医疗保险衔接', timeline: '第8-12个月' },
+      { step: 3, phase: '传承架构', action: '设立家族信托，规划财富传承路径', timeline: '第4-6个月' },
+      { step: 4, phase: '身份申请', action: '申请目标国家长期居留或永居', timeline: '第4-8个月' },
+      { step: 5, phase: '落地准备', action: '税务规划、医疗保险衔接、信托运营', timeline: '第8-12个月' },
     ];
   }
 
@@ -319,6 +390,118 @@ server.tool(
     if (!detail) {
       return {
         content: [{ type: 'text', text: JSON.stringify({ error: `未找到签证项目: ${projectCode}` }) }],
+        isError: true,
+      };
+    }
+    return {
+      content: [{ type: 'text', text: JSON.stringify(detail, null, 2) }],
+    };
+  }
+);
+
+// ---------- 信托产品工具 ----------
+
+server.tool(
+  'listTrustServiceTypes',
+  '获取信托服务的所有类型分类（家族信托、员工信托、海外公司秘书服务）',
+  {},
+  async () => {
+    const result = trustServiceTypes.map(st => ({
+      serviceType: st.serviceType,
+      serviceTypeDesc: st.serviceTypeDesc,
+      jurisdictions: st.jurisdictions || (st.subServices || []).flatMap(ss => ss.jurisdictions || []),
+      subServices: st.subServices || null,
+      services: st.services || null,
+    }));
+    return {
+      content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  'listTrustJurisdictions',
+  '获取所有支持信托服务的司法管辖区及其法律特征对比',
+  {},
+  async () => {
+    const result = trustJurisdictions.map(j => ({
+      code: j.code,
+      name: j.name,
+      legalSystem: j.legalSystem,
+      trustDuration: j.trustDuration,
+      trusteeResidencyRequirement: j.trusteeResidencyRequirement,
+      beneficiaryResidencyRequirement: j.beneficiaryResidencyRequirement,
+      settlorRetainedPowers: j.settlorRetainedPowers,
+      protector: j.protector,
+      confidentiality: j.confidentiality,
+      removeTrustee: j.removeTrustee,
+      trusteeRegulation: j.trusteeRegulation,
+    }));
+    return {
+      content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  'getTrustJurisdictionDetail',
+  '根据司法管辖区代码获取该地区的完整信托法律特征和产品信息',
+  { jurisdictionCode: z.string().describe('司法管辖区代码，如 HK、SG、BVI、KY、SC') },
+  async ({ jurisdictionCode }) => {
+    const jurisdiction = trustJurisdictions.find(j => j.code === jurisdictionCode);
+    if (!jurisdiction) {
+      return {
+        content: [{ type: 'text', text: JSON.stringify({ error: `未找到司法管辖区: ${jurisdictionCode}` }) }],
+        isError: true,
+      };
+    }
+    return {
+      content: [{ type: 'text', text: JSON.stringify(jurisdiction, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  'listTrustProducts',
+  '获取所有可用信托产品的列表概览',
+  {},
+  async () => ({
+    content: [{ type: 'text', text: JSON.stringify(allTrustProducts, null, 2) }],
+  })
+);
+
+server.tool(
+  'searchTrustProducts',
+  '根据关键词、服务类型、司法管辖区搜索信托产品',
+  {
+    keyword: z.string().optional().describe('搜索关键词，支持产品名称、司法管辖区、服务类型、描述模糊匹配'),
+    serviceType: z.string().optional().describe('服务类型筛选，如 家族信托、员工信托、海外公司秘书服务'),
+    jurisdiction: z.string().optional().describe('司法管辖区筛选，如 香港、新加坡、英属维尔京群岛、开曼群岛、塞舌尔群岛'),
+    jurisdictionCode: z.string().optional().describe('司法管辖区代码筛选，如 HK、SG、BVI、KY、SC'),
+  },
+  async ({ keyword, serviceType, jurisdiction, jurisdictionCode }) => {
+    const result = allTrustProducts.filter(p => {
+      if (!matchesTrust(p, keyword)) return false;
+      if (serviceType && p.serviceType !== serviceType) return false;
+      if (jurisdiction && !p.jurisdiction.toLowerCase().includes(jurisdiction.toLowerCase())) return false;
+      if (jurisdictionCode && p.jurisdictionCode !== jurisdictionCode.toUpperCase()) return false;
+      return true;
+    });
+    return {
+      content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  'getTrustProductDetail',
+  '根据产品编号获取信托产品的完整详细信息',
+  { productCode: z.string().describe('产品编号，如 HK_FT_001、SG_FT_001、BVI_OC_001') },
+  async ({ productCode }) => {
+    const detail = trustProductMap[productCode];
+    if (!detail) {
+      return {
+        content: [{ type: 'text', text: JSON.stringify({ error: `未找到信托产品: ${productCode}` }) }],
         isError: true,
       };
     }
