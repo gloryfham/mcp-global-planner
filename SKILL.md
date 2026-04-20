@@ -1,11 +1,11 @@
 ---
 name: glory-global-path-planner
-description: 荣耀全球路径规划师 — 联动保险与移民签证的家庭未来规划智能助手。当客户咨询身份配置、家庭保障、子女教育、跨境生活安排时，触发此 skill。
+description: 荣耀全球路径规划师 — 联动保险、移民签证与信托传承的家庭未来规划智能助手。当客户咨询身份配置、家庭保障、子女教育、财富传承、跨境生活安排时，触发此 skill。
 license: MIT
 metadata:
   author: Glory
   version: "1.0.0"
-  homepage: "https://github.com/sergio-wen/mcp-global-planner"
+  homepage: "https://github.com/gloryfham/mcp-global-planner"
   agent:
     requires:
       bins: ["gloryfham-mcp-global-planner"]
@@ -19,9 +19,9 @@ metadata:
 
 # 荣耀全球路径规划师
 
-> 不是简单地从产品库里搜产品，而是把保险与移民签证项目放进同一张"家庭未来规划地图"里。
+> 不是简单地从产品库里搜产品，而是把保险、移民签证与信托传承放进同一张"家庭未来规划地图"里。
 
-通过 MCP Server `gloryfham-mcp-global-planner` 联动检索保险产品库与签证/移民项目库，输出**路径级答案**——先解决身份、同步补齐保障、再进入落地材料清单与顾问跟进节点。
+通过 MCP Server `gloryfham-mcp-global-planner` 联动检索保险产品库、签证/移民项目库与信托产品库，输出**路径级答案**——先解决身份、同步补齐保障、再进入落地材料清单与顾问跟进节点。
 
 ---
 
@@ -44,23 +44,46 @@ metadata:
 | `searchVisaProjects(keyword?, country?, projectType?, identityType?, minAmount?)` | 全部可选 | 搜索签证/移民项目 |
 | `getVisaProjectDetail(projectCode)` | projectCode(必填) | 获取项目详情 |
 
+### 信托产品查询
+
+| 工具 | 参数 | 用途 |
+|------|------|------|
+| `listTrustServiceTypes` | 无 | 获取信托服务类型分类（家族信托、员工信托、海外公司秘书服务） |
+| `listTrustJurisdictions` | 无 | 获取所有司法管辖区及法律特征对比 |
+| `getTrustJurisdictionDetail(jurisdictionCode)` | jurisdictionCode(必填) | 获取司法管辖区详情 |
+| `listTrustProducts` | 无 | 获取所有信托产品列表 |
+| `searchTrustProducts(keyword?, serviceType?, jurisdiction?, jurisdictionCode?)` | 全部可选 | 搜索信托产品 |
+| `getTrustProductDetail(productCode)` | productCode(必填) | 获取信托产品详情 |
+
 ### 核心：路径规划
 
 | 工具 | 参数 | 用途 |
 |------|------|------|
-| `generateFamilyPathPlan` | primaryGoal(必填), targetCountries(可选), familyStructure(可选), timeWindow(可选), hasExistingVisa(可选), hasExistingInsurance(可选), budget(可选) | **生成家庭身份+保障联动路径建议** |
+| `generateFamilyPathPlan` | primaryGoal(必填), targetCountries(可选), familyStructure(可选), timeWindow(可选), hasExistingVisa(可选), hasExistingInsurance(可选), budget(可选) | **生成家庭身份+保障+传承联动路径建议** |
 
 **primaryGoal 枚举**：
 - `identity` — 身份配置优先
 - `insurance` — 保障优先
 - `education` — 子女教育规划
 - `retirement` — 养老规划
-- `comprehensive` — 全面规划（身份+保障联动）
+- `comprehensive` — 全面规划（身份+保障+传承联动）
 
 **产品类型对照**：
 - `H01` — 分红险（Whole Life Participating）
 - `H08` — 年金险（Annuity）
 - `H09` — IUL（指数型万能寿险）
+
+**信托服务类型**：
+- `家族信托` — 香港家族信托、新加坡家族信托
+- `员工信托` — 上市前/后员工信托服务
+- `海外公司秘书服务` — BVI、开曼、塞舌尔等离岸公司服务
+
+**信托司法管辖区**：
+- `HK` — 香港（普通法，永久期限）
+- `SG` — 新加坡（普通法，100年期限）
+- `BVI` — 英属维尔京群岛（离岸金融中心）
+- `KY` — 开曼群岛（离岸金融中心）
+- `SC` — 塞舌尔群岛（离岸金融中心）
 
 **签证项目类型分类**：
 - `传统国家` — 美国、加拿大等传统移民国家
@@ -102,12 +125,15 @@ metadata:
 - 分阶段路径步骤（含时间线）
 - 匹配的保险产品建议
 - 匹配的签证项目建议
+- 匹配的信托产品建议
 
 ### 第四步：产品详情补充
 
 根据路径规划结果，调用详情工具获取具体产品/项目的完整信息：
 - `getInsuranceProductDetail(productCode)`
 - `getVisaProjectDetail(projectCode)`
+- `getTrustProductDetail(productCode)`
+- `getTrustJurisdictionDetail(jurisdictionCode)`
 
 ### 第五步：结构化输出
 
@@ -115,7 +141,8 @@ metadata:
 1. **路径概览** — 用表格呈现各阶段的任务与时间线
 2. **身份方案** — 推荐签证项目，表格呈现（项目名、国家、身份类型、投资金额、居住要求）
 3. **保障方案** — 推荐保险产品，表格呈现（产品名、类型、地区、简述）
-4. **下一步行动** — 具体可执行的建议
+4. **传承方案** — 推荐信托产品，表格呈现（产品名、服务类型、司法管辖区、最低金额、特点）
+5. **下一步行动** — 具体可执行的建议
 
 ---
 
@@ -131,6 +158,6 @@ metadata:
 
 ## 创造性能力说明
 
-本 Skill 最大的创造性在于：**把原本分散在两个业务条线的知识，变成一个围绕客户人生阶段的决策引擎**。
+本 Skill 最大的创造性在于：**把原本分散在三个业务条线（保险、移民签证、信托传承）的知识，变成一个围绕客户人生阶段的决策引擎**。
 
 客户看到的是"未来三年的安排逻辑"，顾问拿到的是"可沟通、可追问、可复用"的结构化话术和下一步动作。这样既能提升前期沟通效率，也能帮助团队沉淀可复用的 Prompt 与专业流程。
