@@ -1,10 +1,10 @@
 # @gloryfham/mcp-global-planner
 
-荣耀全球路径规划师 — 联动保险与移民签证的家庭未来规划智能助手。
+荣耀全球路径规划师 — 联动保险、移民签证与信托传承的家庭未来规划智能助手。
 
 ## 核心理念
 
-不是简单地从产品库里搜产品，而是把保险与移民签证项目放进同一张"家庭未来规划地图"里。当客户提出子女教育、身份配置、家庭保障、跨境生活安排等需求时，输出**路径级答案**——先解决身份、同步补齐保障、再进入落地材料清单与顾问跟进节点。
+不是简单地从产品库里搜产品，而是把保险、移民签证与信托传承放进同一张"家庭未来规划地图"里。当客户提出子女教育、身份配置、家庭保障、财富传承、跨境生活安排等需求时，输出**路径级答案**——先解决身份、同步补齐保障、再进入落地材料清单与顾问跟进节点。
 
 ## 安装
 
@@ -44,6 +44,29 @@ npx @gloryfham/mcp-global-planner
 | `listAllVisaProjects` | 无 | 获取所有签证/移民项目列表 |
 | `searchVisaProjects(keyword?, country?, projectType?, identityType?, minAmount?)` | 全部可选 | 搜索签证/移民项目 |
 | `getVisaProjectDetail(projectCode)` | projectCode(必填) | 获取项目详情 |
+
+### 信托产品查询
+
+| 工具 | 参数 | 描述 |
+|------|------|------|
+| `listTrustServiceTypes` | 无 | 获取信托服务类型分类（家族信托、员工信托、海外公司秘书服务） |
+| `listTrustJurisdictions` | 无 | 获取所有司法管辖区及法律特征对比 |
+| `getTrustJurisdictionDetail(jurisdictionCode)` | jurisdictionCode(必填) | 获取司法管辖区详情 |
+| `listTrustProducts` | 无 | 获取所有信托产品列表 |
+| `searchTrustProducts(keyword?, serviceType?, jurisdiction?, jurisdictionCode?)` | 全部可选 | 搜索信托产品 |
+| `getTrustProductDetail(productCode)` | productCode(必填) | 获取信托产品详情 |
+
+**信托服务类型**：
+- `家族信托` — 香港家族信托、新加坡家族信托
+- `员工信托` — 上市前/后员工信托服务
+- `海外公司秘书服务` — BVI、开曼、塞舌尔等离岸公司服务
+
+**信托司法管辖区**：
+- `HK` — 香港（普通法，永久期限）
+- `SG` — 新加坡（普通法，100年期限）
+- `BVI` — 英属维尔京群岛（离岸金融中心）
+- `KY` — 开曼群岛（离岸金融中心）
+- `SC` — 塞舌尔群岛（离岸金融中心）
 
 ### 核心：路径规划
 
