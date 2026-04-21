@@ -1,10 +1,10 @@
 ---
 name: glory-global-path-planner
-description: 荣耀全球路径规划师 — 联动保险、移民签证与信托传承的家庭未来规划智能助手。当客户咨询身份配置、家庭保障、子女教育、财富传承、跨境生活安排时，触发此 skill。
+description: 荣耀全球路径规划师 — 联动国内/海外保险、移民签证与信托传承的家庭未来规划智能助手。当客户咨询身份配置、家庭保障、子女教育、财富传承、跨境生活安排时，触发此 skill。
 license: MIT
 metadata:
   author: Glory
-  version: "1.0.0"
+  version: "2.0.0"
   homepage: "https://github.com/gloryfham/mcp-global-planner"
   agent:
     requires:
@@ -19,21 +19,51 @@ metadata:
 
 # 荣耀全球路径规划师
 
-> 不是简单地从产品库里搜产品，而是把保险、移民签证与信托传承放进同一张"家庭未来规划地图"里。
+> 不是简单地从产品库里搜产品，而是把国内/海外保险、移民签证与信托传承放进同一张"家庭未来规划地图"里。
 
-通过 MCP Server `gloryfham-mcp-global-planner` 联动检索保险产品库、签证/移民项目库与信托产品库，输出**路径级答案**——先解决身份、同步补齐保障、再进入落地材料清单与顾问跟进节点。
+通过 MCP Server `gloryfham-mcp-global-planner` 联动检索**国内保险产品库**、**海外保险产品库**、签证/移民项目库与信托产品库，输出**路径级答案**——先解决身份、同步补齐保障、再进入落地材料清单与顾问跟进节点。
 
 ---
 
 ## 可用工具
 
-### 保险产品查询
+### 保险产品查询（海外）
 
 | 工具 | 参数 | 用途 |
 |------|------|------|
-| `listInsuranceProducts` | 无 | 获取所有保险产品列表 |
-| `searchInsuranceProducts(keyword?, productType?, region?)` | 全部可选 | 搜索保险产品 |
-| `getInsuranceProductDetail(productCode)` | productCode(必填) | 获取产品详情 |
+| `listInsuranceProducts` | 无 | 获取所有海外保险产品列表 |
+| `searchInsuranceProducts(keyword?, productType?, region?)` | 全部可选 | 搜索海外保险产品 |
+| `getInsuranceProductDetail(productCode)` | productCode(必填) | 获取海外产品详情 |
+
+### 保险产品查询（国内）
+
+| 工具 | 参数 | 用途 |
+|------|------|------|
+| `listDomesticInsuranceProducts(channel?)` | channel(可选) | 获取所有国内产品列表 |
+| `searchDomesticInsuranceProducts(keyword?, productType?, channel?, company?, hotLabel?)` | 全部可选 | 搜索国内保险产品 |
+| `getDomesticInsuranceProductDetail(productCode)` | productCode(必填) | 获取国内产品详情 |
+
+**国内产品类型**：
+- `P01` — 终身寿险
+- `P03` — 年金保险
+- `P04` — 重大疾病保险
+- `P05` — 医疗保险
+- `P06` — 防癌险
+- `P08` — 增额终身寿险
+- `P12` — 两全保险
+- `P15` — 意外伤害保险
+
+**国内渠道**：
+- `internet` — 互联网渠道（53个产品）
+- `offline` — 线下渠道（58个产品）
+
+**国内热门标签**：
+- `H01` — 保证续保
+- `H02` — 保证领取
+- `H03` — 高性价比
+- `H04` — 热门产品
+- `H06` — 新品上线
+- `H08` — 限时优惠
 
 ### 签证/移民项目查询
 
@@ -123,14 +153,16 @@ metadata:
 调用 `generateFamilyPathPlan(primaryGoal=..., ...)` 获取：
 - 优先级判断（先身份还是先保障）
 - 分阶段路径步骤（含时间线）
-- 匹配的保险产品建议
+- 匹配的**海外**保险产品建议
+- 匹配的**国内**保险产品建议
 - 匹配的签证项目建议
 - 匹配的信托产品建议
 
 ### 第四步：产品详情补充
 
 根据路径规划结果，调用详情工具获取具体产品/项目的完整信息：
-- `getInsuranceProductDetail(productCode)`
+- `getInsuranceProductDetail(productCode)` — 海外产品详情
+- `getDomesticInsuranceProductDetail(productCode)` — 国内产品详情
 - `getVisaProjectDetail(projectCode)`
 - `getTrustProductDetail(productCode)`
 - `getTrustJurisdictionDetail(jurisdictionCode)`
@@ -140,7 +172,7 @@ metadata:
 输出格式：
 1. **路径概览** — 用表格呈现各阶段的任务与时间线
 2. **身份方案** — 推荐签证项目，表格呈现（项目名、国家、身份类型、投资金额、居住要求）
-3. **保障方案** — 推荐保险产品，表格呈现（产品名、类型、地区、简述）
+3. **保障方案** — 推荐保险产品，分为**海外**和**国内**两部分，表格呈现（产品名、类型、渠道/地区、简述）
 4. **传承方案** — 推荐信托产品，表格呈现（产品名、服务类型、司法管辖区、最低金额、特点）
 5. **下一步行动** — 具体可执行的建议
 
@@ -158,6 +190,6 @@ metadata:
 
 ## 创造性能力说明
 
-本 Skill 最大的创造性在于：**把原本分散在三个业务条线（保险、移民签证、信托传承）的知识，变成一个围绕客户人生阶段的决策引擎**。
+本 Skill 最大的创造性在于：**把原本分散在四个业务条线（国内保险、海外保险、移民签证、信托传承）的知识，变成一个围绕客户人生阶段的决策引擎**。
 
 客户看到的是"未来三年的安排逻辑"，顾问拿到的是"可沟通、可追问、可复用"的结构化话术和下一步动作。这样既能提升前期沟通效率，也能帮助团队沉淀可复用的 Prompt 与专业流程。

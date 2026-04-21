@@ -1,10 +1,10 @@
 # @gloryfham/mcp-global-planner
 
-荣耀全球路径规划师 — 联动保险、移民签证与信托传承的家庭未来规划智能助手。
+荣耀全球路径规划师 — 联动国内/海外保险、移民签证与信托传承的家庭未来规划智能助手。
 
 ## 核心理念
 
-不是简单地从产品库里搜产品，而是把保险、移民签证与信托传承放进同一张"家庭未来规划地图"里。当客户提出子女教育、身份配置、家庭保障、财富传承、跨境生活安排等需求时，输出**路径级答案**——先解决身份、同步补齐保障、再进入落地材料清单与顾问跟进节点。
+不是简单地从产品库里搜产品，而是把**国内保险**、**海外保险**、移民签证与信托传承放进同一张"家庭未来规划地图"里。当客户提出子女教育、身份配置、家庭保障、财富传承、跨境生活安排等需求时，输出**路径级答案**——先解决身份、同步补齐保障、再进入落地材料清单与顾问跟进节点。
 
 ## 安装
 
@@ -28,13 +28,27 @@ npx @gloryfham/mcp-global-planner
 
 ## 可用工具
 
-### 保险产品查询
+### 保险产品查询（海外）
 
 | 工具 | 参数 | 描述 |
 |------|------|------|
-| `listInsuranceProducts` | 无 | 获取所有保险产品列表 |
-| `searchInsuranceProducts(keyword?, productType?, region?)` | 全部可选 | 搜索保险产品 |
-| `getInsuranceProductDetail(productCode)` | productCode(必填) | 获取产品详情 |
+| `listInsuranceProducts` | 无 | 获取所有海外保险产品列表 |
+| `searchInsuranceProducts(keyword?, productType?, region?)` | 全部可选 | 搜索海外保险产品 |
+| `getInsuranceProductDetail(productCode)` | productCode(必填) | 获取海外产品详情 |
+
+### 保险产品查询（国内）
+
+| 工具 | 参数 | 描述 |
+|------|------|------|
+| `listDomesticInsuranceProducts(channel?)` | channel(可选) | 获取所有国内产品列表 |
+| `searchDomesticInsuranceProducts(keyword?, productType?, channel?, company?, hotLabel?)` | 全部可选 | 搜索国内保险产品 |
+| `getDomesticInsuranceProductDetail(productCode)` | productCode(必填) | 获取国内产品详情 |
+
+**国内保险数据**：
+- 111 个产品（互联网 53 + 线下 58）
+- 31 家保险公司
+- 16 种产品类型（重疾/医疗/意外/年金/增额寿险等）
+- 6 种热门标签（保证续保/保证领取/高性价比等）
 
 ### 签证/移民项目查询
 
