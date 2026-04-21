@@ -12,7 +12,7 @@ const __dirname = dirname(__filename);
 // 数据加载
 // ============================================================
 
-// 加载保险产品数据
+// 加载保险产品数据（海外）
 const insuranceRaw = JSON.parse(
   readFileSync(join(__dirname, '..', 'data', 'insurance.json'), 'utf-8')
 );
@@ -20,6 +20,16 @@ const insuranceProducts = insuranceRaw.response?.r || [];
 const insuranceMap = {};
 insuranceProducts.forEach(p => {
   insuranceMap[p.salesPlanCode] = p;
+});
+
+// 加载国内保险产品数据
+const domesticInsuranceRaw = JSON.parse(
+  readFileSync(join(__dirname, '..', '..', 'mcp-domestic-insurance', 'data', 'domestic-products.json'), 'utf-8')
+);
+const domesticInsuranceProducts = domesticInsuranceRaw || [];
+const domesticInsuranceMap = {};
+domesticInsuranceProducts.forEach(p => {
+  domesticInsuranceMap[p.productCode] = p;
 });
 
 // 加载签证项目数据
@@ -100,6 +110,18 @@ function matchesInsurance(product, keyword) {
   );
 }
 
+function matchesDomesticInsurance(product, keyword) {
+  if (!keyword) return true;
+  const kw = keyword.toLowerCase();
+  return (
+    (product.productFullName || '').toLowerCase().includes(kw) ||
+    (product.productShortName || '').toLowerCase().includes(kw) ||
+    (product.companyShortName || '').toLowerCase().includes(kw) ||
+    (product.productListPageIntroduction || '').toLowerCase().includes(kw) ||
+    (product.brandShortName || '').toLowerCase().includes(kw)
+  );
+}
+
 function matchesVisa(project, keyword) {
   if (!keyword) return true;
   const kw = keyword.toLowerCase();
@@ -148,6 +170,7 @@ function generatePathRecommendation({
   const recommendations = {
     pathSteps: [],
     insuranceSuggestions: [],
+    domesticInsuranceSuggestions: [],
     visaSuggestions: [],
     trustSuggestions: [],
     priority: '',
@@ -187,6 +210,13 @@ function generatePathRecommendation({
       ).slice(0, 5);
     }
 
+    // 同时推荐国内保险产品（作为基础保障）
+    recommendations.domesticInsuranceSuggestions = domesticInsuranceProducts.filter(p =>
+      p.productTypeCodeList?.includes('P04') || // 重疾险
+      p.productTypeCodeList?.includes('P05') || // 医疗险
+      p.productTypeCodeList?.includes('P15')    // 意外险
+    ).slice(0, 3);
+
     // 推荐与目标地区匹配的信托产品
     const matchedTrusts = allTrustProducts.filter(t =>
       targetRegions.has(t.jurisdictionCode) || t.jurisdictionCode === 'BVI' || t.jurisdictionCode === 'KY'
@@ -206,6 +236,9 @@ function generatePathRecommendation({
     recommendations.rationale = '如果家庭当前更关注风险保障和财富传承，可以先搭建保险架构，身份规划可在保障到位后择机启动。';
 
     recommendations.insuranceSuggestions = insuranceProducts.slice(0, 5);
+    
+    // 同时推荐国内保险产品
+    recommendations.domesticInsuranceSuggestions = domesticInsuranceProducts.slice(0, 5);
 
     if (matchedVisas.length > 0) {
       recommendations.visaSuggestions = matchedVisas.slice(0, 3);
@@ -222,10 +255,17 @@ function generatePathRecommendation({
     recommendations.priority = '教育金储备 + 身份布局联动';
     recommendations.rationale = '子女教育是长期目标，建议通过保险锁定教育金，同时为目标留学国家提前布局身份。';
 
-    // 推荐年金险/分红险
+    // 推荐年金险/分红险（海外）
     recommendations.insuranceSuggestions = insuranceProducts.filter(p =>
       ['H01', 'H08'].includes(p.salesPlanType)
     ).slice(0, 5);
+    
+    // 推荐国内年金险/增额寿险
+    recommendations.domesticInsuranceSuggestions = domesticInsuranceProducts.filter(p =>
+      p.productTypeCodeList?.includes('P03') || // 年金险
+      p.productTypeCodeList?.includes('P08') || // 增额终身寿险
+      p.productTypeCodeList?.includes('P01')    // 终身寿险
+    ).slice(0, 3);
 
     // 推荐教育相关签证项目（如加拿大、新加坡、香港等）
     recommendations.visaSuggestions = allVisaProjects.filter(v =>
@@ -243,10 +283,17 @@ function generatePathRecommendation({
     recommendations.priority = '养老规划 + 宜居身份 + 传承架构';
     recommendations.rationale = '养老规划应尽早锁定长期稳定收益，同时考虑目标养老地的身份安排和财富传承架构。';
 
-    // 推荐年金险/分红险
+    // 推荐年金险/分红险（海外）
     recommendations.insuranceSuggestions = insuranceProducts.filter(p =>
       ['H01', 'H08'].includes(p.salesPlanType)
     ).slice(0, 5);
+    
+    // 推荐国内养老相关产品
+    recommendations.domesticInsuranceSuggestions = domesticInsuranceProducts.filter(p =>
+      p.productTypeCodeList?.includes('P03') || // 年金险
+      p.productTypeCodeList?.includes('P08') || // 增额终身寿险
+      p.productTypeCodeList?.includes('P01')    // 终身寿险
+    ).slice(0, 3);
 
     // 推荐养老友好型国家
     recommendations.visaSuggestions = allVisaProjects.filter(v =>
@@ -283,7 +330,7 @@ const server = new McpServer({
 
 server.tool(
   'listInsuranceProducts',
-  '获取所有可用保险产品的列表概览',
+  '获取所有可用保险产品（海外）的列表概览',
   {},
   async () => ({
     content: [{ type: 'text', text: JSON.stringify(insuranceProducts, null, 2) }],
@@ -292,7 +339,7 @@ server.tool(
 
 server.tool(
   'searchInsuranceProducts',
-  '根据关键词、产品类型、地区搜索保险产品列表',
+  '根据关键词、产品类型、地区搜索保险产品（海外）列表',
   {
     keyword: z.string().optional().describe('搜索关键词，支持产品名称、简称、标签模糊匹配'),
     productType: z.string().optional().describe('产品类型筛选，如 H01(分红险)/H08(年金险)/H09(IUL)'),
@@ -313,13 +360,75 @@ server.tool(
 
 server.tool(
   'getInsuranceProductDetail',
-  '根据产品编号获取保险产品的完整详细信息',
+  '根据产品编号获取保险产品（海外）的完整详细信息',
   { productCode: z.string().describe('产品编号，如 PRU_PACE') },
   async ({ productCode }) => {
     const detail = insuranceMap[productCode];
     if (!detail) {
       return {
         content: [{ type: 'text', text: JSON.stringify({ error: `未找到保险产品: ${productCode}` }) }],
+        isError: true,
+      };
+    }
+    return {
+      content: [{ type: 'text', text: JSON.stringify(detail, null, 2) }],
+    };
+  }
+);
+
+// ---------- 国内保险产品工具 ----------
+
+server.tool(
+  'listDomesticInsuranceProducts',
+  '获取所有可用国内保险产品的列表概览（互联网+线下渠道）',
+  {
+    channel: z.enum(['internet', 'offline', 'all']).optional().default('all').describe('渠道筛选: internet=互联网, offline=线下, all=全部'),
+  },
+  async ({ channel = 'all' }) => {
+    let products = domesticInsuranceProducts;
+    if (channel !== 'all') {
+      products = domesticInsuranceProducts.filter(p => p.channel === channel);
+    }
+    return {
+      content: [{ type: 'text', text: JSON.stringify(products, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  'searchDomesticInsuranceProducts',
+  '根据关键词、产品类型、公司、渠道搜索国内保险产品列表',
+  {
+    keyword: z.string().optional().describe('搜索关键词，支持产品名称、公司名、产品简介模糊匹配'),
+    productType: z.string().optional().describe('产品类型代码筛选，如 P01/P04/P13 等'),
+    channel: z.enum(['internet', 'offline']).optional().describe('渠道筛选: internet=互联网, offline=线下'),
+    company: z.string().optional().describe('保险公司筛选，如 平安健康/中英人寿/太保寿'),
+    hotLabel: z.string().optional().describe('热门标签筛选，如 H01/H04'),
+  },
+  async ({ keyword, productType, channel, company, hotLabel }) => {
+    const result = domesticInsuranceProducts.filter(p => {
+      if (!matchesDomesticInsurance(p, keyword)) return false;
+      if (productType && !p.productTypeCodeList?.includes(productType)) return false;
+      if (channel && p.channel !== channel) return false;
+      if (company && !(p.companyShortName || '').includes(company)) return false;
+      if (hotLabel && !p.hotLabelList?.includes(hotLabel)) return false;
+      return true;
+    });
+    return {
+      content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  'getDomesticInsuranceProductDetail',
+  '根据产品编号获取国内保险产品的完整详细信息',
+  { productCode: z.string().describe('产品编号，如 AM100000588/179403/NQF') },
+  async ({ productCode }) => {
+    const detail = domesticInsuranceMap[productCode];
+    if (!detail) {
+      return {
+        content: [{ type: 'text', text: JSON.stringify({ error: `未找到国内保险产品: ${productCode}` }) }],
         isError: true,
       };
     }
